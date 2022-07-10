@@ -1,0 +1,8 @@
+# <message.key> (<format> = <desc>, ...) = <description>
+prefix = Plugin's prefix
+menu.title-style (title = GUI title) = Global format of every GUI titles
+menu.close = Close button in GUIs
+menu.previous (page = Current page number, total = Total pages count) = Previous button in paginated GUIs
+menu.next (page = Current page number, total = Total pages count) = Next button in paginated GUIs
+menu.page (page = Current page number, total = Total pages count) = Current page indicator in paginated GUIs
+misc.cancelled-by-reload = Operation got cancelled due to a reload
