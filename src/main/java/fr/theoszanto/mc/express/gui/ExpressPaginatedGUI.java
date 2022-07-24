@@ -10,17 +10,18 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public abstract class ExpressPaginatedGUI<P extends ExpressPlugin<P>, T> extends ExpressGUI<P> {
-	protected final @NotNull List<@NotNull T> list;
-	protected final int pageMax;
+	protected final @NotNull List<@NotNull T> list = new ArrayList<>();
+	protected int pageMax;
 	protected int page;
 
-	public ExpressPaginatedGUI(@NotNull P plugin, @NotNull List<@NotNull T> list, int rows, @NotNull String key, @Nullable Object @NotNull... format) {
+	public ExpressPaginatedGUI(@NotNull P plugin, @NotNull Collection<? extends @NotNull T> list, int rows, @NotNull String key, @Nullable Object @NotNull... format) {
 		super(plugin, rows, key, format);
-		this.list = list;
-		this.pageMax = Math.max(0, (list.size() - 1) / this.contentSlots().length);
+		this.setElements(list);
 		this.page = 0;
 	}
 
@@ -92,5 +93,16 @@ public abstract class ExpressPaginatedGUI<P extends ExpressPlugin<P>, T> extends
 			}
 		}
 		return this.onOtherClick(player, click, action, data);
+	}
+
+	protected void setElements(@NotNull Collection<? extends @NotNull T> elements) {
+		this.list.clear();
+		this.list.addAll(elements);
+		this.recomputePageMax();
+	}
+
+	protected void recomputePageMax() {
+		this.pageMax = Math.max(0, (this.list.size() - 1) / this.contentSlots().length);
+		this.page = Math.min(this.page, this.pageMax);
 	}
 }
