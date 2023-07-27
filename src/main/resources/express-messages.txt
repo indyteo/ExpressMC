@@ -6,3 +6,4 @@ menu.previous (page = Current page number, total = Total pages count) = Previous
 menu.next (page = Current page number, total = Total pages count) = Next button in paginated GUIs
 menu.page (page = Current page number, total = Total pages count) = Current page indicator in paginated GUIs
 misc.cancelled-by-reload = Operation got cancelled due to a reload
+misc.insert-original = Text to click to insert original value in chat edition requests

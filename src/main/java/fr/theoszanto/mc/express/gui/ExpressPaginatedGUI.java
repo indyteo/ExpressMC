@@ -46,7 +46,7 @@ public abstract class ExpressPaginatedGUI<P extends ExpressPlugin<P>, T> extends
 			this.set(slot, new ItemBuilder(Material.STRUCTURE_VOID, 1, this.i18n(key, format)));
 	}
 
-	protected abstract void prepareGUI();
+	protected abstract void prepareGUI(@NotNull Player player);
 
 	protected abstract int @NotNull[] contentSlots();
 
@@ -54,7 +54,7 @@ public abstract class ExpressPaginatedGUI<P extends ExpressPlugin<P>, T> extends
 
 	@Override
 	public final void onOpen(@NotNull Player player, @Nullable ExpressGUI<P> previous) {
-		this.prepareGUI();
+		this.prepareGUI(player);
 		if (!this.list.isEmpty()) {
 			int[] contentSlots = this.contentSlots();
 			int i = this.page * contentSlots.length;

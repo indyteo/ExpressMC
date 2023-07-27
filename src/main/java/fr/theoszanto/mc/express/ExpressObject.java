@@ -65,6 +65,10 @@ public abstract class ExpressObject<P extends ExpressPlugin<P>> implements Logge
 		Bukkit.getScheduler().runTask(this.plugin, task);
 	}
 
+	public final void async(@NotNull Runnable task) {
+		Bukkit.getScheduler().runTaskAsynchronously(this.plugin, task);
+	}
+
 	public final @NotNull ExpressObject<P> instanciate(@NotNull String className, @Nullable List<?> args) {
 		if (args == null)
 			args = Collections.emptyList();

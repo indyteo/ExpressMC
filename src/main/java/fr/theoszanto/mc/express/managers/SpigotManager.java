@@ -6,6 +6,8 @@ import fr.theoszanto.mc.express.commands.ExpressCommand;
 import fr.theoszanto.mc.express.gui.ExpressGUI;
 import fr.theoszanto.mc.express.listeners.ExpressListener;
 import fr.theoszanto.mc.express.utils.JavaUtils;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
@@ -140,6 +142,16 @@ public class SpigotManager<P extends ExpressPlugin<P>> extends ExpressObject<P> 
 				gui.onClose((Player) entity);
 			}
 		}
+	}
+
+	@Contract(pure = true)
+	public @NotNull CompletableFuture<@NotNull String> requestChatEdition(@NotNull Player player, @Nullable String original, long timeoutDelay, TimeUnit unit) {
+		if (original != null) {
+			TextComponent insertOriginal = new TextComponent(TextComponent.fromLegacyText(this.i18n("misc.insert-original")));
+			insertOriginal.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, original));
+			player.spigot().sendMessage(insertOriginal);
+		}
+		return this.requestChatMessage(player, timeoutDelay, unit);
 	}
 
 	@Contract(pure = true)
