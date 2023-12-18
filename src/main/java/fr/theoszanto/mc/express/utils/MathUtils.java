@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
@@ -91,12 +92,20 @@ public class MathUtils {
 	}
 
 	public static <T extends Weighted> @NotNull T weightedRandom(@NotNull Collection<@NotNull T> elements) throws IllegalArgumentException {
+		return weightedRandom(elements, false);
+	}
+
+	public static <T extends Weighted> @NotNull T weightedRandom(@NotNull Collection<@NotNull T> elements, boolean remove) throws IllegalArgumentException {
 		double random = random(0, totalWeight(elements));
 		double weight = 0;
-		for (T reward : elements) {
+		for (Iterator<T> iterator = elements.iterator(); iterator.hasNext(); ) {
+			T reward = iterator.next();
 			weight += reward.getWeight();
-			if (random < weight)
+			if (random < weight) {
+				if (remove)
+					iterator.remove();
 				return reward;
+			}
 		}
 		throw new IllegalArgumentException("Could not find random element in collection. Is it empty?");
 	}
