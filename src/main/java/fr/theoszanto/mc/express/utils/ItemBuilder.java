@@ -3,6 +3,7 @@ package fr.theoszanto.mc.express.utils;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
@@ -24,6 +25,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 public class ItemBuilder {
@@ -274,8 +276,8 @@ public class ItemBuilder {
 
 	@MustBeInvokedByOverriders
 	protected void buildMeta(@NotNull ItemMeta meta) {
-		meta.setDisplayName(this.displayName);
-		meta.setLore(this.lore);
+		meta.displayName(this.displayName == null ? null : Component.text(this.displayName));
+		meta.lore(this.lore == null ? null : this.lore.stream().map(Component::text).toList());
 		this.flags.forEach(meta::addItemFlags);
 		meta.setUnbreakable(this.unbreakable);
 		meta.setAttributeModifiers(this.attributes);
@@ -308,9 +310,9 @@ public class ItemBuilder {
 		if (meta == null)
 			return builder;
 		if (meta.hasDisplayName())
-			builder.setDisplayName(meta.getDisplayName());
+			builder.setDisplayName(ItemUtils.COMPONENT_SERIALIZER.serialize(Objects.requireNonNull(meta.displayName())));
 		if (meta.hasLore())
-			builder.setLore(meta.getLore());
+			builder.setLore(Objects.requireNonNull(meta.lore()).stream().map(ItemUtils.COMPONENT_SERIALIZER::serialize).toList());
 		builder.setFlags(meta.getItemFlags());
 		builder.setUnbreakable(meta.isUnbreakable());
 		if (meta.hasAttributeModifiers())

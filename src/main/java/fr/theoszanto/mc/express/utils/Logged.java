@@ -1,8 +1,6 @@
 package fr.theoszanto.mc.express.utils;
 
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.chat.hover.content.Text;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -15,11 +13,10 @@ public interface Logged {
 
 	default void debug(@NotNull String message) {
 		this.getLogger().info(message);
-		TextComponent component = new TextComponent("§8[§cDEBUG§8]§r " + message);
-		component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(JavaUtils.caller())));
+		Component component = Component.text("§8[§cDEBUG§8]§r " + message).hoverEvent(Component.text(JavaUtils.caller()));
 		for (Player player : Bukkit.getOnlinePlayers())
 			if (player.isOp())
-				player.spigot().sendMessage(component);
+				player.sendMessage(component);
 	}
 
 	default void log(@NotNull String message) {

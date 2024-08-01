@@ -26,9 +26,8 @@ public class JavaUtils {
 		Class<?>[] types = new Class<?>[objects.length];
 		for (int i = 0; i < objects.length; i++) {
 			Object object = objects[i];
-			if (object instanceof Null) {
-				Null<?> nullObject = (Null<?>) object;
-				types[i] = nullObject.getType();
+			if (object instanceof Null<?> nullObject) {
+				types[i] = nullObject.type();
 				objects[i] = nullObject.get();
 			} else
 				types[i] = object == null ? Object.class : object.getClass();
@@ -36,7 +35,7 @@ public class JavaUtils {
 		return types;
 	}
 
-	@SuppressWarnings({ "unchecked", "UnstableApiUsage" })
+	@SuppressWarnings("unchecked")
 	public static <T> @NotNull List<? extends T> instanciateSubClasses(@NotNull Class<T> parentClass, @NotNull String packageName, @NotNull Object @NotNull... initArgs) {
 		ClassLoader loader = parentClass.getClassLoader();
 		ClassPath path;
@@ -72,20 +71,10 @@ public class JavaUtils {
 		}
 	}
 
-	public static class Null<T> {
-		private final @NotNull Class<T> type;
-
-		public Null(@NotNull Class<T> type) {
-			this.type = type;
-		}
-
-		public @NotNull Class<T> getType() {
-			return this.type;
-		}
-
+	public record Null<T>(@NotNull Class<T> type) {
 		public @Nullable T get() {
-			return null;
-		}
+				return null;
+			}
 	}
 
 	public static <T> @NotNull T @NotNull[] subArray(@NotNull T @NotNull[] array, int start) {

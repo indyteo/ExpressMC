@@ -1,29 +1,45 @@
 package fr.theoszanto.mc.express.utils;
 
+import io.papermc.paper.inventory.ItemRarity;
+import io.papermc.paper.inventory.tooltip.TooltipContext;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.MaterialData;
 import org.bukkit.util.io.BukkitObjectInputStream;
-import org.bukkit.util.io.BukkitObjectOutputStream;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Range;
+import org.jetbrains.annotations.Unmodifiable;
 import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Random;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 
 public class ItemUtils {
 	public static final @NotNull ItemStack EMPTY = new ItemStack(Material.AIR);
 	public static final @NotNull String @NotNull[] NO_LORE = new String[0];
+	public static final @NotNull LegacyComponentSerializer COMPONENT_SERIALIZER = LegacyComponentSerializer.legacySection();
+	public static final @NotNull LegacyComponentSerializer AMPERSAND_SERIALIZER = LegacyComponentSerializer.legacyAmpersand();
 
 	private ItemUtils() {
 		throw new UnsupportedOperationException();
@@ -34,7 +50,7 @@ public class ItemUtils {
 	}
 
 	@DelegateDeserialization(ItemStack.class)
-	@SuppressWarnings({ "deprecation", "EqualsWhichDoesntCheckParameterClass", "MethodDoesntCallSuperMethod" })
+	@SuppressWarnings({ "deprecation" })
 	private static class UnmodifiableItemStack extends ItemStack {
 		private final @NotNull ItemStack item;
 
@@ -73,6 +89,7 @@ public class ItemUtils {
 		}
 
 		@Override
+		@SuppressWarnings({ "EqualsWhichDoesntCheckParameterClass", "EqualsDoesntCheckParameterClass" })
 		public boolean equals(Object obj) {
 			return this.item.equals(obj);
 		}
@@ -83,6 +100,7 @@ public class ItemUtils {
 		}
 
 		@Override
+		@SuppressWarnings("MethodDoesntCallSuperMethod")
 		public @NotNull ItemStack clone() {
 			return this.item.clone();
 		}
@@ -115,6 +133,112 @@ public class ItemUtils {
 		@Override
 		public boolean hasItemMeta() {
 			return this.item.hasItemMeta();
+		}
+
+		@Override
+		public @NotNull ItemStack withType(@NotNull Material type) {
+			return this.item.withType(type);
+		}
+
+		@Override
+		@SuppressWarnings("removal")
+		public @NotNull String getTranslationKey() {
+			return this.item.getTranslationKey();
+		}
+
+		@Override
+		public @NotNull ItemStack enchantWithLevels(@Range(from = 1L, to = 30L) int levels, boolean allowTreasure, @NotNull Random random) {
+			return this.item.enchantWithLevels(levels, allowTreasure, random);
+		}
+
+		@Override
+		public @NotNull HoverEvent<HoverEvent.ShowItem> asHoverEvent(@NotNull UnaryOperator<HoverEvent.ShowItem> op) {
+			return this.item.asHoverEvent(op);
+		}
+
+		@Override
+		public @NotNull Component displayName() {
+			return this.item.displayName();
+		}
+
+		@Override
+		public @NotNull ItemStack ensureServerConversions() {
+			return this.item.ensureServerConversions();
+		}
+
+		@Override
+		public byte @NotNull[] serializeAsBytes() {
+			return this.item.serializeAsBytes();
+		}
+
+		@Override
+		public @Nullable String getI18NDisplayName() {
+			return this.item.getI18NDisplayName();
+		}
+
+		@Override
+		public int getMaxItemUseDuration() {
+			return this.item.getMaxItemUseDuration();
+		}
+
+		@Override
+		public @NotNull ItemStack asOne() {
+			return this.item.asOne();
+		}
+
+		@Override
+		public @NotNull ItemStack asQuantity(int qty) {
+			return this.item.asQuantity(qty);
+		}
+
+		@Override
+		public @Nullable List<String> getLore() {
+			return this.item.getLore();
+		}
+
+		@Override
+		public @Nullable List<Component> lore() {
+			return this.item.lore();
+		}
+
+		@Override
+		public @NotNull Set<ItemFlag> getItemFlags() {
+			return this.item.getItemFlags();
+		}
+
+		@Override
+		public boolean hasItemFlag(@NotNull ItemFlag flag) {
+			return this.item.hasItemFlag(flag);
+		}
+
+		@Override
+		public @NotNull String translationKey() {
+			return this.item.translationKey();
+		}
+
+		@Override
+		public @NotNull ItemRarity getRarity() {
+			return this.item.getRarity();
+		}
+
+		@Override
+		public boolean isRepairableBy(@NotNull ItemStack repairMaterial) {
+			return this.item.isRepairableBy(repairMaterial);
+		}
+
+		@Override
+		public boolean canRepair(@NotNull ItemStack toBeRepaired) {
+			return this.item.canRepair(toBeRepaired);
+		}
+
+		@Override
+		public boolean isEmpty() {
+			return this.item.isEmpty();
+		}
+
+		@Override
+		public @NotNull @Unmodifiable List<Component> computeTooltipLines(@NotNull TooltipContext tooltipContext, @Nullable Player player) {
+			return this.item.computeTooltipLines(tooltipContext, player);
 		}
 
 		@Override
@@ -168,6 +292,66 @@ public class ItemUtils {
 		}
 
 		@Override
+		public void removeEnchantments() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public boolean editMeta(@NotNull Consumer<? super ItemMeta> consumer) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public <M extends ItemMeta> boolean editMeta(@NotNull Class<M> metaClass, @NotNull Consumer<? super M> consumer) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public @NotNull ItemStack add() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public @NotNull ItemStack add(int qty) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public @NotNull ItemStack subtract() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public @NotNull ItemStack subtract(int qty) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void setLore(@Nullable List<String> lore) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void lore(@Nullable List<? extends Component> lore) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void addItemFlags(@NotNull ItemFlag... itemFlags) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void removeItemFlags(@NotNull ItemFlag... itemFlags) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public @NotNull ItemStack damage(int amount, @NotNull LivingEntity livingEntity) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
 		public @NotNull Map<String, Object> serialize() {
 			return this.item.serialize();
 		}
@@ -181,15 +365,13 @@ public class ItemUtils {
 		ItemMeta meta = item.getItemMeta();
 		if (meta != null) {
 			if (meta.hasDisplayName())
-				return meta.getDisplayName();
-			if (meta.hasLocalizedName())
-				return meta.getLocalizedName();
+				return COMPONENT_SERIALIZER.serialize(Objects.requireNonNull(meta.displayName()));
 		}
 		char[] s = item.getType().name().replace('_', ' ').toLowerCase().toCharArray();
 		boolean space = true;
 		for (int i = 0; i < s.length; i++) {
 			if (space)
-				s[i] += 'A' - 'a';
+				s[i] += (char) ('A' - 'a');
 			space = s[i] == ' ';
 		}
 		return new String(s);
@@ -204,10 +386,10 @@ public class ItemUtils {
 		ItemMeta meta = item.getItemMeta();
 		if (meta == null)
 			return;
-		List<String> existingLore = meta.hasLore() ? meta.getLore() : new ArrayList<>();
+		List<Component> existingLore = meta.hasLore() ? meta.lore() : new ArrayList<>();
 		assert existingLore != null;
-		existingLore.addAll(Arrays.asList(lore));
-		meta.setLore(existingLore);
+		existingLore.addAll(Arrays.stream(lore).map(Component::text).toList());
+		meta.lore(existingLore);
 		item.setItemMeta(meta);
 	}
 
@@ -227,17 +409,14 @@ public class ItemUtils {
 	}
 
 	public static @NotNull String toString(@NotNull ItemStack item) {
-		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		try (BukkitObjectOutputStream ds = new BukkitObjectOutputStream(os)) {
-			ds.writeObject(item);
-			ds.flush();
-			return new String(Base64Coder.encode(os.toByteArray()));
-		} catch (IOException e) {
-			throw new IllegalStateException("Unable to serialize item", e);
-		}
+		return new String(Base64Coder.encode(item.serializeAsBytes()));
 	}
 
 	public static @NotNull ItemStack fromString(@NotNull String item) {
+		return ItemStack.deserializeBytes(Base64Coder.decode(item));
+	}
+
+	public static @NotNull ItemStack fromLegacyString(@NotNull String item) {
 		ByteArrayInputStream is = new ByteArrayInputStream(Base64Coder.decode(item));
 		try (BukkitObjectInputStream ds = new BukkitObjectInputStream(is)) {
 			return (ItemStack) ds.readObject();
@@ -246,10 +425,17 @@ public class ItemUtils {
 		}
 	}
 
-	@SuppressWarnings("deprecation")
+	public static @NotNull String translateAmpersandColorCodes(@NotNull String str) {
+		return COMPONENT_SERIALIZER.serialize(AMPERSAND_SERIALIZER.deserialize(str));
+	}
+
+	@SuppressWarnings("deprecation") // Bukkit.getUnsafe() is deprecated for no reason
 	public static boolean basicItemEquals(@NotNull ItemStack item1, @NotNull ItemStack item2) {
 		Material comparisonType = (item1.getType().isLegacy()) ? Bukkit.getUnsafe().fromLegacy(item1.getData(), true) : item1.getType(); // This may be called from legacy item stacks, try to get the right material
-		return comparisonType == item2.getType() && item1.getDurability() == item2.getDurability() && item1.hasItemMeta() == item2.hasItemMeta() && (!item1.hasItemMeta() || basicMetaEquals(item1.getItemMeta(), item2.getItemMeta()));
+		return comparisonType == item2.getType()
+				&& (!(item1.getItemMeta() instanceof Damageable damageable1) || item2.getItemMeta() instanceof Damageable damageable2 && damageable1.getDamage() == damageable2.getDamage())
+				&& item1.hasItemMeta() == item2.hasItemMeta()
+				&& (!item1.hasItemMeta() || basicMetaEquals(item1.getItemMeta(), item2.getItemMeta()));
 	}
 
 	public static boolean basicMetaEquals(@Nullable ItemMeta meta1, @Nullable ItemMeta meta2) {
@@ -257,9 +443,30 @@ public class ItemUtils {
 			return meta2 == null;
 		if (meta2 == null)
 			return false;
-		return ((meta1.hasDisplayName() ? meta2.hasDisplayName() && meta1.getDisplayName().equals(meta2.getDisplayName()) : !meta2.hasDisplayName()))
+		return ((meta1.hasDisplayName() ? meta2.hasDisplayName() && basicComponentEquals(meta1.displayName(), meta2.displayName()) : !meta2.hasDisplayName()))
 				&& (meta1.hasEnchants() ? meta2.hasEnchants() && meta1.getEnchants().equals(meta2.getEnchants()) : !meta2.hasEnchants())
-				&& ((meta1.hasLore() && meta1.getLore() != null) ? meta2.hasLore() && meta1.getLore().equals(meta2.getLore()) : !meta2.hasLore())
+				&& (meta1.hasLore() ? meta2.hasLore() && basicComponentsEquals(meta1.lore(), meta2.lore()) : !meta2.hasLore())
 				&& (meta1.getItemFlags().equals(meta2.getItemFlags()));
+	}
+
+	public static boolean basicComponentsEquals(@Nullable List<@NotNull Component> components1, @Nullable List<@NotNull Component> components2) {
+		if (components1 == null)
+			return components2 == null;
+		if (components2 == null)
+			return false;
+		if (components1.size() != components2.size())
+			return false;
+		for (int i = 0; i < components1.size(); i++)
+			if (!basicComponentEquals(components1.get(i), components2.get(i)))
+				return false;
+		return true;
+	}
+
+	public static boolean basicComponentEquals(@Nullable Component component1, @Nullable Component component2) {
+		if (component1 == null)
+			return component2 == null;
+		if (component2 == null)
+			return false;
+		return COMPONENT_SERIALIZER.serialize(component1).equals(COMPONENT_SERIALIZER.serialize(component2));
 	}
 }

@@ -5,9 +5,11 @@ import fr.theoszanto.mc.express.ExpressPlugin;
 import fr.theoszanto.mc.express.commands.ExpressCommand;
 import fr.theoszanto.mc.express.gui.ExpressGUI;
 import fr.theoszanto.mc.express.listeners.ExpressListener;
+import fr.theoszanto.mc.express.utils.ItemUtils;
 import fr.theoszanto.mc.express.utils.JavaUtils;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.TextComponent;
+import io.papermc.paper.event.player.AsyncChatEvent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
@@ -21,7 +23,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.PluginManager;
 import org.jetbrains.annotations.Contract;
@@ -146,11 +147,8 @@ public class SpigotManager<P extends ExpressPlugin<P>> extends ExpressObject<P> 
 
 	@Contract(pure = true)
 	public @NotNull CompletableFuture<@NotNull String> requestChatEdition(@NotNull Player player, @Nullable String original, long timeoutDelay, TimeUnit unit) {
-		if (original != null) {
-			TextComponent insertOriginal = new TextComponent(TextComponent.fromLegacyText(this.i18n("misc.insert-original")));
-			insertOriginal.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, original));
-			player.spigot().sendMessage(insertOriginal);
-		}
+		if (original != null)
+			player.sendMessage(Component.text(this.i18n("misc.insert-original")).clickEvent(ClickEvent.suggestCommand(original)));
 		return this.requestChatMessage(player, timeoutDelay, unit);
 	}
 
@@ -173,14 +171,14 @@ public class SpigotManager<P extends ExpressPlugin<P>> extends ExpressObject<P> 
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
-	private void onAsyncPlayerChat(@NotNull AsyncPlayerChatEvent event) {
+	private void onAsyncPlayerChat(@NotNull AsyncChatEvent event) {
 		Player player = event.getPlayer();
 		ChatRequest request = this.pendingChatRequests.remove(player);
 		if (request != null) {
-			request.fulfill(event.getMessage());
+			request.fulfill(ItemUtils.COMPONENT_SERIALIZER.serialize(event.message()));
 			event.setCancelled(true);
 			try {
-				event.getRecipients().clear();
+				event.viewers().clear();
 			} catch (Throwable ignored) {}
 		}
 	}
@@ -205,15 +203,7 @@ public class SpigotManager<P extends ExpressPlugin<P>> extends ExpressObject<P> 
 		this.i18nMessage(player, "misc.cancelled-by-reload");
 	}
 
-	private static final class ChatRequest {
-		private final @NotNull CompletableFuture<@NotNull String> future;
-		private final @NotNull TimerTask timeout;
-
-		public ChatRequest(@NotNull CompletableFuture<@NotNull String> future, @NotNull TimerTask timeout) {
-			this.future = future;
-			this.timeout = timeout;
-		}
-
+	private record ChatRequest(@NotNull CompletableFuture<@NotNull String> future, @NotNull TimerTask timeout) {
 		public void fulfill(@NotNull String message) {
 			this.future.complete(message);
 			this.timeout.cancel();
