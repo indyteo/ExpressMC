@@ -3,8 +3,8 @@ package fr.theoszanto.mc.express.gui;
 import fr.theoszanto.mc.express.ExpressObject;
 import fr.theoszanto.mc.express.ExpressPlugin;
 import fr.theoszanto.mc.express.utils.ItemBuilder;
+import fr.theoszanto.mc.express.utils.ItemUtils;
 import fr.theoszanto.mc.express.utils.MathUtils;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -28,7 +28,7 @@ public abstract class ExpressGUI<P extends ExpressPlugin<P>> extends ExpressObje
 
 	public ExpressGUI(@NotNull P plugin, int rows, @NotNull String key, @Nullable Object @NotNull... format) {
 		this(plugin, Bukkit.createInventory(null, MathUtils.minMax(1, rows, 6) * 9,
-				Component.text(plugin.i18n("menu.title-style", "title", plugin.i18n(key, format)))), MathUtils.minMax(1, rows, 6));
+				ItemUtils.COMPONENT_SERIALIZER.deserialize(plugin.i18n("menu.title-style", "title", plugin.i18n(key, format)))), MathUtils.minMax(1, rows, 6));
 	}
 
 	private ExpressGUI(@NotNull P plugin, @NotNull Inventory inventory, int rows) {
