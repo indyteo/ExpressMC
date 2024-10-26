@@ -16,18 +16,18 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.MaterialData;
-import org.bukkit.util.io.BukkitObjectInputStream;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 import org.jetbrains.annotations.Unmodifiable;
 import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
@@ -40,6 +40,8 @@ public class ItemUtils {
 	public static final @NotNull String @NotNull[] NO_LORE = new String[0];
 	public static final @NotNull LegacyComponentSerializer COMPONENT_SERIALIZER = LegacyComponentSerializer.legacySection();
 	public static final @NotNull LegacyComponentSerializer AMPERSAND_SERIALIZER = LegacyComponentSerializer.legacyAmpersand();
+
+	private static final @NotNull DecimalFormat formatter = new DecimalFormat("0.0", DecimalFormatSymbols.getInstance(Locale.US));
 
 	private ItemUtils() {
 		throw new UnsupportedOperationException();
@@ -400,7 +402,7 @@ public class ItemUtils {
 	}
 
 	public static int stackAmountFromValue(double value) {
-		String valueStr = Double.toString(value);
+		String valueStr = formatter.format(value);
 		String firstTwoDigits = value < 1 ? "1" : valueStr.substring(0, value >= 10 ? 2 : 1);
 		int amount = Integer.parseInt(firstTwoDigits);
 		if (amount > 64)
@@ -416,17 +418,15 @@ public class ItemUtils {
 		return ItemStack.deserializeBytes(Base64Coder.decode(item));
 	}
 
-	public static @NotNull ItemStack fromLegacyString(@NotNull String item) {
-		ByteArrayInputStream is = new ByteArrayInputStream(Base64Coder.decode(item));
-		try (BukkitObjectInputStream ds = new BukkitObjectInputStream(is)) {
-			return (ItemStack) ds.readObject();
-		} catch (IOException | ClassNotFoundException e) {
-			throw new IllegalStateException("Unable to deserialize item", e);
-		}
-	}
-
 	public static @NotNull String translateAmpersandColorCodes(@NotNull String str) {
 		return COMPONENT_SERIALIZER.serialize(AMPERSAND_SERIALIZER.deserialize(str));
+	}
+
+	public static @NotNull ItemStack hideTooltip(@NotNull ItemStack item) {
+		ItemMeta meta = item.getItemMeta();
+		meta.setHideTooltip(true);
+		item.setItemMeta(meta);
+		return item;
 	}
 
 	@SuppressWarnings("deprecation") // Bukkit.getUnsafe() is deprecated for no reason

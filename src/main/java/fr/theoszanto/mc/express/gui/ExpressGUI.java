@@ -25,6 +25,7 @@ public abstract class ExpressGUI<P extends ExpressPlugin<P>> extends ExpressObje
 	protected final int rows;
 
 	public static final @NotNull String CLOSE = "close";
+	public static final @NotNull ItemStack BORDER = ItemUtils.hideTooltip(new ItemStack(Material.GRAY_STAINED_GLASS_PANE));
 
 	public ExpressGUI(@NotNull P plugin, int rows, @NotNull String key, @Nullable Object @NotNull... format) {
 		this(plugin, Bukkit.createInventory(null, MathUtils.minMax(1, rows, 6) * 9,
