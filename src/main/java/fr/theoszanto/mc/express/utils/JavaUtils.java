@@ -26,9 +26,9 @@ public class JavaUtils {
 		Class<?>[] types = new Class<?>[objects.length];
 		for (int i = 0; i < objects.length; i++) {
 			Object object = objects[i];
-			if (object instanceof Null<?> nullObject) {
-				types[i] = nullObject.type();
-				objects[i] = nullObject.get();
+			if (object instanceof Null<?>(Class<?> type)) {
+				types[i] = type;
+				objects[i] = null;
 			} else
 				types[i] = object == null ? Object.class : object.getClass();
 		}

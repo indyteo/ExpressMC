@@ -51,6 +51,10 @@ public class ItemUtils {
 		return new UnmodifiableItemStack(item);
 	}
 
+	public static boolean isUnmodifiable(@NotNull ItemStack item) {
+		return item instanceof UnmodifiableItemStack;
+	}
+
 	@DelegateDeserialization(ItemStack.class)
 	@SuppressWarnings({ "deprecation" })
 	private static class UnmodifiableItemStack extends ItemStack {
@@ -71,6 +75,7 @@ public class ItemUtils {
 		}
 
 		@Override
+		@SuppressWarnings("removal")
 		public @Nullable MaterialData getData() {
 			return this.item.getData();
 		}
@@ -179,6 +184,7 @@ public class ItemUtils {
 		}
 
 		@Override
+		@SuppressWarnings("removal")
 		public int getMaxItemUseDuration() {
 			return this.item.getMaxItemUseDuration();
 		}
@@ -219,6 +225,7 @@ public class ItemUtils {
 		}
 
 		@Override
+		@SuppressWarnings("removal")
 		public @NotNull ItemRarity getRarity() {
 			return this.item.getRarity();
 		}
@@ -254,6 +261,7 @@ public class ItemUtils {
 		}
 
 		@Override
+		@SuppressWarnings("removal")
 		public void setData(@Nullable MaterialData data) {
 			throw new UnsupportedOperationException();
 		}
@@ -429,7 +437,7 @@ public class ItemUtils {
 		return item;
 	}
 
-	@SuppressWarnings("deprecation") // Bukkit.getUnsafe() is deprecated for no reason
+	@SuppressWarnings({ "deprecation", "removal" }) // Bukkit.getUnsafe() is deprecated for no reason
 	public static boolean basicItemEquals(@NotNull ItemStack item1, @NotNull ItemStack item2) {
 		Material comparisonType = (item1.getType().isLegacy()) ? Bukkit.getUnsafe().fromLegacy(item1.getData(), true) : item1.getType(); // This may be called from legacy item stacks, try to get the right material
 		return comparisonType == item2.getType()

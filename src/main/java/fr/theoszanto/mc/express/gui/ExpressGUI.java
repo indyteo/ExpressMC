@@ -69,7 +69,7 @@ public abstract class ExpressGUI<P extends ExpressPlugin<P>> extends ExpressObje
 	}
 
 	protected final void set(int slot, @NotNull ItemStack item, @NotNull String name, @Nullable Object data) {
-		this.inventory.setItem(slot, item);
+		this.inventory.setItem(slot, ItemUtils.isUnmodifiable(item) ? item.clone() : item);
 		this.setData(slot, name, data);
 	}
 
