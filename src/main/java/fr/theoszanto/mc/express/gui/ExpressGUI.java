@@ -29,7 +29,7 @@ public abstract class ExpressGUI<P extends ExpressPlugin<P>> extends ExpressObje
 
 	public ExpressGUI(@NotNull P plugin, int rows, @NotNull String key, @Nullable Object @NotNull... format) {
 		this(plugin, Bukkit.createInventory(null, MathUtils.minMax(1, rows, 6) * 9,
-				ItemUtils.COMPONENT_SERIALIZER.deserialize(plugin.i18n("menu.title-style", "title", plugin.i18n(key, format)))), MathUtils.minMax(1, rows, 6));
+				ItemUtils.component(plugin.i18n("menu.title-style", "title", plugin.i18n(key, format)))), MathUtils.minMax(1, rows, 6));
 	}
 
 	private ExpressGUI(@NotNull P plugin, @NotNull Inventory inventory, int rows) {

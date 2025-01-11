@@ -8,7 +8,6 @@ import fr.theoszanto.mc.express.listeners.ExpressListener;
 import fr.theoszanto.mc.express.utils.ItemUtils;
 import fr.theoszanto.mc.express.utils.JavaUtils;
 import io.papermc.paper.event.player.AsyncChatEvent;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.HumanEntity;
@@ -148,7 +147,7 @@ public class SpigotManager<P extends ExpressPlugin<P>> extends ExpressObject<P> 
 	@Contract(pure = true)
 	public @NotNull CompletableFuture<@NotNull String> requestChatEdition(@NotNull Player player, @Nullable String original, long timeoutDelay, TimeUnit unit) {
 		if (original != null)
-			player.sendMessage(Component.text(this.i18n("misc.insert-original")).clickEvent(ClickEvent.suggestCommand(original)));
+			player.sendMessage(ItemUtils.component(this.i18n("misc.insert-original")).clickEvent(ClickEvent.suggestCommand(original)));
 		return this.requestChatMessage(player, timeoutDelay, unit);
 	}
 

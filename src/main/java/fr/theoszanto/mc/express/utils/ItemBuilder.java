@@ -3,7 +3,6 @@ package fr.theoszanto.mc.express.utils;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
@@ -37,6 +36,7 @@ public class ItemBuilder {
 	private @NotNull Set<@NotNull ItemFlag> flags = EnumSet.noneOf(ItemFlag.class);
 	private boolean unbreakable;
 	private @NotNull Multimap<@NotNull Attribute, @NotNull AttributeModifier> attributes = LinkedHashMultimap.create();
+	private @Nullable Boolean glint;
 
 	public ItemBuilder(@NotNull Material material) {
 		this(material, 1);
@@ -274,13 +274,33 @@ public class ItemBuilder {
 		return !this.attributes.isEmpty();
 	}
 
+	public boolean hasGlint() {
+		return this.glint == null ? !this.enchantments.isEmpty() : this.glint;
+	}
+
+	public @Nullable Boolean getGlint() {
+		return this.glint;
+	}
+
+	@Contract(value = " -> this", mutates = "this")
+	public @NotNull ItemBuilder setGlint() {
+		return this.setGlint(true);
+	}
+
+	@Contract(value = "_ -> this", mutates = "this")
+	public @NotNull ItemBuilder setGlint(@Nullable Boolean glint) {
+		this.glint = glint;
+		return this;
+	}
+
 	@MustBeInvokedByOverriders
 	protected void buildMeta(@NotNull ItemMeta meta) {
-		meta.displayName(this.displayName == null ? null : Component.text(this.displayName));
-		meta.lore(this.lore == null ? null : this.lore.stream().map(Component::text).toList());
+		meta.displayName(this.displayName == null ? null : ItemUtils.component(this.displayName));
+		meta.lore(this.lore == null ? null : this.lore.stream().map(ItemUtils::component).toList());
 		this.flags.forEach(meta::addItemFlags);
 		meta.setUnbreakable(this.unbreakable);
 		meta.setAttributeModifiers(this.attributes);
+		meta.setEnchantmentGlintOverride(this.glint);
 	}
 
 	public @NotNull ItemStack build() {
@@ -317,6 +337,7 @@ public class ItemBuilder {
 		builder.setUnbreakable(meta.isUnbreakable());
 		if (meta.hasAttributeModifiers())
 			builder.setAttributes(meta.getAttributeModifiers());
+		builder.setGlint(meta.getEnchantmentGlintOverride());
 		return builder;
 	}
 

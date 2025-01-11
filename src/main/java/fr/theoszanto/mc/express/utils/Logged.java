@@ -13,7 +13,7 @@ public interface Logged {
 
 	default void debug(@NotNull String message) {
 		this.getLogger().info(message);
-		Component component = Component.text("§8[§cDEBUG§8]§r " + message).hoverEvent(Component.text(JavaUtils.caller()));
+		Component component = ItemUtils.component("§8[§cDEBUG§8]§r " + message).hoverEvent(Component.text(JavaUtils.caller()));
 		for (Player player : Bukkit.getOnlinePlayers())
 			if (player.isOp())
 				player.sendMessage(component);

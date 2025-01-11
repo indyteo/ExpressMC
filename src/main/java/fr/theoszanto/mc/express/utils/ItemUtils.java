@@ -4,6 +4,8 @@ import io.papermc.paper.inventory.ItemRarity;
 import io.papermc.paper.inventory.tooltip.TooltipContext;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
@@ -399,7 +401,7 @@ public class ItemUtils {
 			return;
 		List<Component> existingLore = meta.hasLore() ? meta.lore() : new ArrayList<>();
 		assert existingLore != null;
-		existingLore.addAll(Arrays.stream(lore).map(Component::text).toList());
+		existingLore.addAll(Arrays.stream(lore).map(ItemUtils::component).toList());
 		meta.lore(existingLore);
 		item.setItemMeta(meta);
 	}
@@ -425,6 +427,12 @@ public class ItemUtils {
 
 	public static @NotNull ItemStack fromString(@NotNull String item) {
 		return ItemStack.deserializeBytes(Base64Coder.decode(item));
+	}
+
+	public static @NotNull Component component(@NotNull String text) {
+		return ItemUtils.COMPONENT_SERIALIZER.deserialize(text)
+				.colorIfAbsent(NamedTextColor.GRAY)
+				.decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.byBoolean(false));
 	}
 
 	public static @NotNull String translateAmpersandColorCodes(@NotNull String str) {
