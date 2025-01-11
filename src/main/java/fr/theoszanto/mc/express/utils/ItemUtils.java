@@ -6,6 +6,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
+import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.enchantments.Enchantment;
@@ -16,6 +17,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.MaterialData;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
@@ -107,7 +109,6 @@ public class ItemUtils {
 		}
 
 		@Override
-		@SuppressWarnings("MethodDoesntCallSuperMethod")
 		public @NotNull ItemStack clone() {
 			return this.item.clone();
 		}
@@ -431,10 +432,27 @@ public class ItemUtils {
 	}
 
 	public static @NotNull ItemStack hideTooltip(@NotNull ItemStack item) {
-		ItemMeta meta = item.getItemMeta();
-		meta.setHideTooltip(true);
-		item.setItemMeta(meta);
+		item.editMeta(meta -> meta.setHideTooltip(true));
 		return item;
+	}
+
+	public static @NotNull Material colored(@NotNull Material material, @Nullable DyeColor color) {
+		if (color == null)
+			return material;
+		try {
+			return Material.valueOf(color.name() + "_" + material.name());
+		} catch (IllegalArgumentException e) {
+			return material;
+		}
+	}
+
+	@Contract("_, _, !null -> !null")
+	public static @Nullable Material colored(@NotNull String material, @NotNull DyeColor color, @Nullable Material def) {
+		try {
+			return Material.valueOf(color.name() + "_" + material);
+		} catch (IllegalArgumentException e) {
+			return def;
+		}
 	}
 
 	@SuppressWarnings({ "deprecation", "removal" }) // Bukkit.getUnsafe() is deprecated for no reason
