@@ -52,6 +52,10 @@ public abstract class ExpressObject<P extends ExpressPlugin<P>> implements Logge
 		return lines.isEmpty() ? ItemUtils.NO_LORE : lines.split("\n|\\\\n");
 	}
 
+	public final @NotNull String i18nBoolean(boolean bool) {
+		return this.i18n(bool ? "misc.yes" : "misc.no");
+	}
+
 	public final @NotNull SpigotManager<P> spigot() {
 		return this.plugin.spigot();
 	}
