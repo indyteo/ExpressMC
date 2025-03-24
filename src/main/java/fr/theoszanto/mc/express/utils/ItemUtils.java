@@ -416,7 +416,7 @@ public class ItemUtils {
 		String valueStr = formatter.format(value);
 		String firstTwoDigits = value < 1 ? "1" : valueStr.substring(0, value >= 10 ? 2 : 1);
 		int amount = Integer.parseInt(firstTwoDigits);
-		if (amount > 64)
+		if (amount > 99)
 			amount /= 10;
 		return amount;
 	}

@@ -37,6 +37,7 @@ public class ItemBuilder {
 	private boolean unbreakable;
 	private @NotNull Multimap<@NotNull Attribute, @NotNull AttributeModifier> attributes = LinkedHashMultimap.create();
 	private @Nullable Boolean glint;
+	private @Nullable Integer maxStackSize;
 
 	public ItemBuilder(@NotNull Material material) {
 		this(material, 1);
@@ -55,6 +56,8 @@ public class ItemBuilder {
 		this.amount = amount;
 		this.displayName = displayName;
 		this.setLore(lore);
+		if (amount > material.getMaxStackSize() && amount < 100)
+			this.maxStackSize = amount;
 	}
 /*
 	protected ItemBuilder(@NotNull Material material, int amount, @Nullable String displayName, @Nullable List<@NotNull String> lore) {
@@ -87,7 +90,7 @@ public class ItemBuilder {
 	}
 
 	public int getMaxStackAmount() {
-		return this.material.getMaxStackSize();
+		return this.maxStackSize == null ? this.material.getMaxStackSize() : this.maxStackSize;
 	}
 
 	public @Nullable String getDisplayName() {
@@ -293,6 +296,16 @@ public class ItemBuilder {
 		return this;
 	}
 
+	public @Nullable Integer getMaxStackSize() {
+		return this.maxStackSize;
+	}
+
+	@Contract(value = "_ -> this", mutates = "this")
+	public @NotNull ItemBuilder setMaxStackSize(@Nullable Integer maxStackSize) {
+		this.maxStackSize = maxStackSize;
+		return this;
+	}
+
 	@MustBeInvokedByOverriders
 	protected void buildMeta(@NotNull ItemMeta meta) {
 		meta.displayName(this.displayName == null ? null : ItemUtils.component(this.displayName));
@@ -301,15 +314,14 @@ public class ItemBuilder {
 		meta.setUnbreakable(this.unbreakable);
 		meta.setAttributeModifiers(this.attributes);
 		meta.setEnchantmentGlintOverride(this.glint);
+		meta.setMaxStackSize(this.maxStackSize);
 	}
 
 	public @NotNull ItemStack build() {
-		ItemStack item = new ItemStack(this.material, this.amount);
+		ItemStack item = ItemStack.of(this.material, 1);
 		item.addUnsafeEnchantments(this.enchantments);
-		ItemMeta meta = item.getItemMeta();
-		assert meta != null;
-		this.buildMeta(meta);
-		item.setItemMeta(meta);
+		item.editMeta(this::buildMeta);
+		item.setAmount(this.amount);
 		return item;
 	}
 
