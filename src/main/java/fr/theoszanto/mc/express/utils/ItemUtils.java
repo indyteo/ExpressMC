@@ -421,12 +421,20 @@ public class ItemUtils {
 		return amount;
 	}
 
+	public static byte @NotNull[] toBytes(@NotNull ItemStack item) {
+		return item.serializeAsBytes();
+	}
+
+	public static @NotNull ItemStack fromBytes(byte @NotNull[] item) {
+		return ItemStack.deserializeBytes(item);
+	}
+
 	public static @NotNull String toString(@NotNull ItemStack item) {
-		return new String(Base64Coder.encode(item.serializeAsBytes()));
+		return new String(Base64Coder.encode(toBytes(item)));
 	}
 
 	public static @NotNull ItemStack fromString(@NotNull String item) {
-		return ItemStack.deserializeBytes(Base64Coder.decode(item));
+		return fromBytes(Base64Coder.decode(item));
 	}
 
 	public static @NotNull Component component(@NotNull String text) {
