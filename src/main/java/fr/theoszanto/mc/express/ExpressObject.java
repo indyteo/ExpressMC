@@ -8,6 +8,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
+import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -65,12 +66,12 @@ public abstract class ExpressObject<P extends ExpressPlugin<P>> implements Logge
 		return !(event instanceof Cancellable) || !((Cancellable) event).isCancelled();
 	}
 
-	public final void run(@NotNull Runnable task) {
-		Bukkit.getScheduler().runTask(this.plugin, task);
+	public final @NotNull BukkitTask run(@NotNull Runnable task) {
+		return Bukkit.getScheduler().runTask(this.plugin, task);
 	}
 
-	public final void async(@NotNull Runnable task) {
-		Bukkit.getScheduler().runTaskAsynchronously(this.plugin, task);
+	public final @NotNull BukkitTask async(@NotNull Runnable task) {
+		return Bukkit.getScheduler().runTaskAsynchronously(this.plugin, task);
 	}
 
 	public final @NotNull ExpressObject<P> instanciate(@NotNull String className, @Nullable List<?> args) {
