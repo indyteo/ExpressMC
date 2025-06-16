@@ -54,7 +54,7 @@ public class I18nManager<P extends ExpressPlugin<P>> extends Registry<P, String,
 				throw new IllegalArgumentException("Illegal format parameter key (must be String): " + key);
 			message = message.replaceAll("#\\{" + key + "}", Matcher.quoteReplacement(String.valueOf(value)));
 			if (value instanceof Number number)
-				message = message.replaceAll("#\\{" + key + ":s}", number.doubleValue() < 2 ? "" : "s");
+				message = message.replaceAll("#\\{" + key + ":([^ :}]+)}", number.doubleValue() < 2 ? "" : "$1");
 		}
 		return message;
 	}
