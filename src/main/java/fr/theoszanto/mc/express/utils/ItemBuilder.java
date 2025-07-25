@@ -3,6 +3,9 @@ package fr.theoszanto.mc.express.utils;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
+import io.papermc.paper.datacomponent.DataComponentType;
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
@@ -22,11 +25,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+@SuppressWarnings("UnstableApiUsage") // DataComponentType
 public class ItemBuilder {
 	private @NotNull Material material;
 	private int amount;
@@ -38,6 +43,7 @@ public class ItemBuilder {
 	private @NotNull Multimap<@NotNull Attribute, @NotNull AttributeModifier> attributes = LinkedHashMultimap.create();
 	private @Nullable Boolean glint;
 	private @Nullable Integer maxStackSize;
+	private @NotNull Set<@NotNull DataComponentType> hiddenDataComponents = new HashSet<>();
 
 	public ItemBuilder(@NotNull Material material) {
 		this(material, 1);
@@ -306,6 +312,44 @@ public class ItemBuilder {
 		return this;
 	}
 
+	@UnmodifiableView
+	public @NotNull Set<@NotNull DataComponentType> getHiddenDataComponents() {
+		return Collections.unmodifiableSet(this.hiddenDataComponents);
+	}
+
+	@Contract(value = "_ -> this", mutates = "this")
+	public @NotNull ItemBuilder setHiddenDataComponents(@NotNull Collection<@NotNull DataComponentType> hiddenDataComponents) {
+		this.hiddenDataComponents = new HashSet<>(hiddenDataComponents);
+		return this;
+	}
+
+	@Contract(value = "_ -> this", mutates = "this")
+	public @NotNull ItemBuilder addHiddenDataComponents(@NotNull Collection<@NotNull DataComponentType> hiddenDataComponents) {
+		this.hiddenDataComponents.addAll(hiddenDataComponents);
+		return this;
+	}
+
+	@Contract(value = "_ -> this", mutates = "this")
+	public @NotNull ItemBuilder addHiddenDataComponents(@NotNull DataComponentType @NotNull... hiddenDataComponents) {
+		return this.addHiddenDataComponents(Arrays.asList(hiddenDataComponents));
+	}
+
+	@Contract(value = "_ -> this", mutates = "this")
+	public @NotNull ItemBuilder addHiddenDataComponent(@NotNull DataComponentType hiddenDataComponent) {
+		this.hiddenDataComponents.add(hiddenDataComponent);
+		return this;
+	}
+
+	@Contract(value = "_ -> this", mutates = "this")
+	public @NotNull ItemBuilder removeHiddenDataComponent(@NotNull DataComponentType hiddenDataComponent) {
+		this.hiddenDataComponents.remove(hiddenDataComponent);
+		return this;
+	}
+
+	public boolean hasHiddenDataComponents() {
+		return !this.hiddenDataComponents.isEmpty();
+	}
+
 	@MustBeInvokedByOverriders
 	protected void buildMeta(@NotNull ItemMeta meta) {
 		meta.displayName(this.displayName == null ? null : ItemUtils.component(this.displayName));
@@ -322,6 +366,7 @@ public class ItemBuilder {
 		item.addUnsafeEnchantments(this.enchantments);
 		item.editMeta(this::buildMeta);
 		item.setAmount(this.amount);
+		item.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().hiddenComponents(this.hiddenDataComponents).build());
 		return item;
 	}
 
