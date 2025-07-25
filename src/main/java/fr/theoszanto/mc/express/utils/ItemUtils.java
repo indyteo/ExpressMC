@@ -40,7 +40,7 @@ import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
 public class ItemUtils {
-	public static final @NotNull ItemStack EMPTY = new ItemStack(Material.AIR);
+	public static final @NotNull ItemStack EMPTY = ItemStack.of(Material.AIR);
 	public static final @NotNull String @NotNull[] NO_LORE = new String[0];
 	public static final @NotNull LegacyComponentSerializer COMPONENT_SERIALIZER = LegacyComponentSerializer.legacySection();
 	public static final @NotNull LegacyComponentSerializer AMPERSAND_SERIALIZER = LegacyComponentSerializer.legacyAmpersand();
@@ -111,6 +111,7 @@ public class ItemUtils {
 		}
 
 		@Override
+		@SuppressWarnings("MethodDoesntCallSuperMethod")
 		public @NotNull ItemStack clone() {
 			return this.item.clone();
 		}

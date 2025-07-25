@@ -5,15 +5,20 @@ import fr.theoszanto.mc.express.ExpressPlugin;
 import fr.theoszanto.mc.express.commands.ExpressCommand;
 import fr.theoszanto.mc.express.gui.ExpressGUI;
 import fr.theoszanto.mc.express.listeners.ExpressListener;
-import fr.theoszanto.mc.express.utils.ItemUtils;
 import fr.theoszanto.mc.express.utils.JavaUtils;
-import io.papermc.paper.event.player.AsyncChatEvent;
-import net.kyori.adventure.text.event.ClickEvent;
+import io.papermc.paper.dialog.Dialog;
+import io.papermc.paper.registry.data.dialog.ActionButton;
+import io.papermc.paper.registry.data.dialog.DialogBase;
+import io.papermc.paper.registry.data.dialog.action.DialogAction;
+import io.papermc.paper.registry.data.dialog.body.DialogBody;
+import io.papermc.paper.registry.data.dialog.input.DialogInput;
+import io.papermc.paper.registry.data.dialog.type.DialogType;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickCallback;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.ClickType;
@@ -24,14 +29,15 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.PluginManager;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CompletableFuture;
@@ -40,7 +46,7 @@ import java.util.concurrent.TimeoutException;
 
 public class SpigotManager<P extends ExpressPlugin<P>> extends ExpressObject<P> implements Listener {
 	private final @NotNull Map<@NotNull Player, @NotNull ExpressGUI<P>> activeGUIs = new HashMap<>();
-	private final @NotNull Map<@NotNull Player, @NotNull ChatRequest> pendingChatRequests = new HashMap<>();
+	private final @NotNull Map<@NotNull Player, @NotNull TextRequest> pendingTextRequests = new HashMap<>();
 	private boolean resetting = false;
 
 	private static final @NotNull Timer timer = new Timer();
@@ -84,10 +90,9 @@ public class SpigotManager<P extends ExpressPlugin<P>> extends ExpressObject<P> 
 	@EventHandler
 	private void onGUIClick(@NotNull InventoryClickEvent event) {
 		HumanEntity entity = event.getWhoClicked();
-		if (entity instanceof Player) {
+		if (entity instanceof Player player) {
 			ExpressGUI<P> gui = this.activeGUIs.get(entity);
 			if (gui != null && gui.getInventory().equals(event.getInventory())) {
-				Player player = (Player) entity;
 				InventoryType.SlotType slotType = event.getSlotType();
 				ClickType click = event.getClick();
 				InventoryAction action = event.getAction();
@@ -144,15 +149,12 @@ public class SpigotManager<P extends ExpressPlugin<P>> extends ExpressObject<P> 
 		}
 	}
 
-	@Contract(pure = true)
-	public @NotNull CompletableFuture<@NotNull String> requestChatEdition(@NotNull Player player, @Nullable String original, long timeoutDelay, TimeUnit unit) {
-		if (original != null)
-			player.sendMessage(ItemUtils.component(this.i18n("misc.insert-original")).clickEvent(ClickEvent.suggestCommand(original)));
-		return this.requestChatMessage(player, timeoutDelay, unit);
+	public @NotNull CompletableFuture<@NotNull String> requestText(@NotNull Player player, @NotNull String description, long timeoutDelay, TimeUnit unit) {
+		return this.requestText(player, description, timeoutDelay, unit, null);
 	}
 
-	@Contract(pure = true)
-	public @NotNull CompletableFuture<@NotNull String> requestChatMessage(@NotNull Player player, long timeoutDelay, TimeUnit unit) {
+	@SuppressWarnings("UnstableApiUsage") // Dialog
+	public @NotNull CompletableFuture<@NotNull String> requestText(@NotNull Player player, @NotNull String description, long timeoutDelay, TimeUnit unit, @Nullable String original) {
 		if (this.resetting)
 			return JavaUtils.cancelledCompletableFuture();
 		CompletableFuture<String> future = new CompletableFuture<>();
@@ -160,32 +162,64 @@ public class SpigotManager<P extends ExpressPlugin<P>> extends ExpressObject<P> 
 			@Override
 			public void run() {
 				future.completeExceptionally(new TimeoutException());
-				pendingChatRequests.remove(player);
+				SpigotManager.this.pendingTextRequests.remove(player);
 			}
 		};
 		timer.schedule(timeout, unit.toMillis(timeoutDelay));
-		ChatRequest request = new ChatRequest(future, timeout);
-		this.pendingChatRequests.put(player, request);
+		TextRequest request = new TextRequest(future, timeout);
+		TextRequest previous = this.pendingTextRequests.put(player, request);
+		if (previous != null)
+			previous.abort();
+		player.showDialog(Dialog.create(dialog -> dialog.empty()
+				.base(DialogBase.create(
+						Component.text(this.i18n("dialog.request-text-title")),
+						null,
+						false,
+						false,
+						DialogBase.DialogAfterAction.CLOSE,
+						List.of(DialogBody.plainMessage(Component.text(description), 500)),
+						List.of(DialogInput.text(
+								"value",
+								500,
+								Component.empty(),
+								false,
+								Objects.requireNonNullElse(original, ""),
+								Integer.MAX_VALUE,
+								null
+						))
+				))
+				.type(DialogType.confirmation(
+						ActionButton.create(
+								Component.text(this.i18n("dialog.confirm")),
+								null,
+								150,
+								DialogAction.customClick((response, audience) -> {
+									if (audience != player)
+										return;
+									String value = response.getText("value");
+									request.fulfill(Objects.requireNonNullElse(value, ""));
+									this.pendingTextRequests.remove(player);
+								}, ClickCallback.Options.builder().uses(1).lifetime(Duration.of(timeoutDelay, unit.toChronoUnit())).build())
+						),
+						ActionButton.create(
+								Component.text(this.i18n("dialog.cancel")),
+								null,
+								150,
+								DialogAction.customClick((response, audience) -> {
+									if (audience != player)
+										return;
+									request.abort();
+									this.pendingTextRequests.remove(player);
+								}, ClickCallback.Options.builder().uses(1).lifetime(Duration.of(timeoutDelay, unit.toChronoUnit())).build())
+						)
+				))));
 		return future;
-	}
-
-	@EventHandler(priority = EventPriority.LOWEST)
-	private void onAsyncPlayerChat(@NotNull AsyncChatEvent event) {
-		Player player = event.getPlayer();
-		ChatRequest request = this.pendingChatRequests.remove(player);
-		if (request != null) {
-			request.fulfill(ItemUtils.COMPONENT_SERIALIZER.serialize(event.message()));
-			event.setCancelled(true);
-			try {
-				event.viewers().clear();
-			} catch (Throwable ignored) {}
-		}
 	}
 
 	public void reset() {
 		this.resetting = true;
-		this.pendingChatRequests.forEach(this::resetChatRequest);
-		this.pendingChatRequests.clear();
+		this.pendingTextRequests.forEach(this::resetTextRequest);
+		this.pendingTextRequests.clear();
 		new ArrayList<>(this.activeGUIs.keySet()).forEach(this::resetGUI);
 		this.activeGUIs.clear();
 		HandlerList.unregisterAll(this.plugin);
@@ -197,12 +231,12 @@ public class SpigotManager<P extends ExpressPlugin<P>> extends ExpressObject<P> 
 		this.i18nMessage(player, "misc.cancelled-by-reload");
 	}
 
-	private void resetChatRequest(@NotNull Player player, @NotNull ChatRequest request) {
+	private void resetTextRequest(@NotNull Player player, @NotNull TextRequest request) {
 		request.abort();
 		this.i18nMessage(player, "misc.cancelled-by-reload");
 	}
 
-	private record ChatRequest(@NotNull CompletableFuture<@NotNull String> future, @NotNull TimerTask timeout) {
+	private record TextRequest(@NotNull CompletableFuture<@NotNull String> future, @NotNull TimerTask timeout) {
 		public void fulfill(@NotNull String message) {
 			this.future.complete(message);
 			this.timeout.cancel();

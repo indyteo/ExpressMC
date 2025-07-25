@@ -5,7 +5,9 @@ menu.close = Close button in GUIs
 menu.previous (page = Current page number, total = Total pages count) = Previous button in paginated GUIs
 menu.next (page = Current page number, total = Total pages count) = Next button in paginated GUIs
 menu.page (page = Current page number, total = Total pages count) = Current page indicator in paginated GUIs
+dialog.request-text-title = Title of the text request dialog
+dialog.confirm = Confirm button in dialogs
+dialog.cancel = Cancel button in dialogs
 misc.cancelled-by-reload = Operation got cancelled due to a reload
-misc.insert-original = Text to click to insert original value in chat edition requests
 misc.yes = Boolean "true"
 misc.no = Boolean "false"
