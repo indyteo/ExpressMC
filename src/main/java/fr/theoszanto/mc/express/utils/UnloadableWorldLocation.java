@@ -3,6 +3,7 @@ package fr.theoszanto.mc.express.utils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -51,5 +52,18 @@ public class UnloadableWorldLocation extends Location {
 
 	public void setWorldName(@NotNull String worldName) {
 		this.worldName = worldName;
+	}
+
+	@Contract(value = "null -> false", pure = true)
+	public boolean blockEquals(@Nullable Location other) {
+		if (other == null)
+			return false;
+		if (other == this)
+			return true;
+		World world = this.getWorld();
+		return world != null && world.equals(other.getWorld())
+				&& this.getBlockX() == other.getBlockX()
+				&& this.getBlockY() == other.getBlockY()
+				&& this.getBlockZ() == other.getBlockZ();
 	}
 }
