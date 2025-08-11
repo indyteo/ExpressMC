@@ -161,6 +161,7 @@ public class SpigotManager<P extends ExpressPlugin<P>> extends ExpressObject<P> 
 		TimerTask timeout = new TimerTask() {
 			@Override
 			public void run() {
+				player.closeDialog();
 				future.completeExceptionally(new TimeoutException());
 				SpigotManager.this.pendingTextRequests.remove(player);
 			}
@@ -232,6 +233,7 @@ public class SpigotManager<P extends ExpressPlugin<P>> extends ExpressObject<P> 
 	}
 
 	private void resetTextRequest(@NotNull Player player, @NotNull TextRequest request) {
+		player.closeDialog();
 		request.abort();
 		this.i18nMessage(player, "misc.cancelled-by-reload");
 	}
