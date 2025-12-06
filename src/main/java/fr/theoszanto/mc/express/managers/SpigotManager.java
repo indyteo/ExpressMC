@@ -104,7 +104,7 @@ public class SpigotManager<P extends ExpressPlugin<P>> extends ExpressObject<P> 
 					int slot = event.getSlot();
 					if (gui.getInventory().equals(clickedInventory)) {
 						ExpressGUI.SlotData data = gui.getSlotData(slot);
-						if (data != null && data.getName().equals(ExpressGUI.CLOSE)) {
+						if (data != null && data.name().equals(ExpressGUI.CLOSE)) {
 							event.setCancelled(true);
 							this.run(player::closeInventory);
 						} else if (gui.onClick(player, click, action, data))

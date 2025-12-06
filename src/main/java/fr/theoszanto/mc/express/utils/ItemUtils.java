@@ -1,7 +1,11 @@
 package fr.theoszanto.mc.express.utils;
 
+import io.papermc.paper.datacomponent.DataComponentBuilder;
+import io.papermc.paper.datacomponent.DataComponentType;
 import io.papermc.paper.inventory.ItemRarity;
 import io.papermc.paper.inventory.tooltip.TooltipContext;
+import io.papermc.paper.persistence.PersistentDataContainerView;
+import io.papermc.paper.registry.set.RegistryKeySet;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -19,6 +23,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.MaterialData;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -37,6 +42,7 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
 public class ItemUtils {
@@ -60,14 +66,16 @@ public class ItemUtils {
 	}
 
 	@DelegateDeserialization(ItemStack.class)
-	@SuppressWarnings({ "deprecation" })
+	@SuppressWarnings({ "deprecation", "UnstableApiUsage" })
 	private static class UnmodifiableItemStack extends ItemStack {
 		private final @NotNull ItemStack item;
 
 		private UnmodifiableItemStack(@NotNull ItemStack item) {
+			super(item);
 			this.item = item;
 		}
 
+		//<editor-fold desc="Delegations" defaultstate="collapsed">
 		@Override
 		public @NotNull Material getType() {
 			return this.item.getType();
@@ -255,6 +263,58 @@ public class ItemUtils {
 		}
 
 		@Override
+		public @NotNull Component effectiveName() {
+			return this.item.effectiveName();
+		}
+
+		@Override
+		public int getMaxItemUseDuration(@NotNull LivingEntity entity) {
+			return this.item.getMaxItemUseDuration(entity);
+		}
+
+		@Override
+		public <T> @Nullable T getData(DataComponentType.@NotNull Valued<@NotNull T> type) {
+			return this.item.getData(type);
+		}
+
+		@Override
+		public <T> @Nullable T getDataOrDefault(DataComponentType.@NotNull Valued<? extends @NotNull T> type, @Nullable T fallback) {
+			return this.item.getDataOrDefault(type, fallback);
+		}
+
+		@Override
+		public boolean hasData(@NotNull DataComponentType type) {
+			return this.item.hasData(type);
+		}
+
+		@Override
+		public @Unmodifiable Set<@NotNull DataComponentType> getDataTypes() {
+			return this.item.getDataTypes();
+		}
+
+		@Override
+		public boolean isDataOverridden(@NotNull DataComponentType type) {
+			return this.item.isDataOverridden(type);
+		}
+
+		@Override
+		public boolean matchesWithoutData(@NotNull ItemStack item, @NotNull Set<@NotNull DataComponentType> excludeTypes) {
+			return this.item.matchesWithoutData(item, excludeTypes);
+		}
+
+		@Override
+		public boolean matchesWithoutData(@NotNull ItemStack item, @NotNull Set<@NotNull DataComponentType> excludeTypes, boolean ignoreCount) {
+			return this.item.matchesWithoutData(item, excludeTypes, ignoreCount);
+		}
+
+		@Override
+		public @NotNull HoverEvent<HoverEvent.ShowItem> asHoverEvent() {
+			return this.item.asHoverEvent();
+		}
+		//</editor-fold>
+
+		//<editor-fold desc="Prohibitions" defaultstate="collapsed">
+		@Override
 		public void setType(@NotNull Material type) {
 			throw new UnsupportedOperationException();
 		}
@@ -366,6 +426,52 @@ public class ItemUtils {
 		}
 
 		@Override
+		public @NotNull PersistentDataContainerView getPersistentDataContainer() {
+			return super.getPersistentDataContainer();
+		}
+
+		@Override
+		public boolean editPersistentDataContainer(@NotNull Consumer<PersistentDataContainer> consumer) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public @NotNull ItemStack enchantWithLevels(int levels, @NotNull RegistryKeySet<@NotNull Enchantment> keySet, @NotNull Random random) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public <T> void setData(DataComponentType.@NotNull Valued<@NotNull T> type, @NotNull DataComponentBuilder<@NotNull T> valueBuilder) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public <T> void setData(DataComponentType.@NotNull Valued<@NotNull T> type, @NotNull T value) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void setData(DataComponentType.@NotNull NonValued type) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void unsetData(@NotNull DataComponentType type) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void resetData(@NotNull DataComponentType type) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void copyDataFrom(@NotNull ItemStack source, @NotNull Predicate<@NotNull DataComponentType> filter) {
+			throw new UnsupportedOperationException();
+		}
+		//</editor-fold>
+
+		@Override
 		public @NotNull Map<String, Object> serialize() {
 			return this.item.serialize();
 		}
@@ -441,7 +547,7 @@ public class ItemUtils {
 	public static @NotNull Component component(@NotNull String text) {
 		return ItemUtils.COMPONENT_SERIALIZER.deserialize(text)
 				.colorIfAbsent(NamedTextColor.GRAY)
-				.decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.byBoolean(false));
+				.decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE);
 	}
 
 	public static @NotNull String translateAmpersandColorCodes(@NotNull String str) {

@@ -25,7 +25,7 @@ public abstract class ExpressGUI<P extends ExpressPlugin<P>> extends ExpressObje
 	protected final int rows;
 
 	public static final @NotNull String CLOSE = "close";
-	public static final @NotNull ItemStack BORDER = ItemUtils.hideTooltip(new ItemStack(Material.GRAY_STAINED_GLASS_PANE));
+	public static final @NotNull ItemStack BORDER = ItemUtils.hideTooltip(ItemStack.of(Material.GRAY_STAINED_GLASS_PANE));
 
 	public ExpressGUI(@NotNull P plugin, int rows, @NotNull String key, @Nullable Object @NotNull... format) {
 		this(plugin, Bukkit.createInventory(null, MathUtils.minMax(1, rows, 6) * 9,
@@ -131,43 +131,59 @@ public abstract class ExpressGUI<P extends ExpressPlugin<P>> extends ExpressObje
 		return row * 9 + column;
 	}
 
-	public static final class SlotData {
-		private final int slot;
-		private final @NotNull String name;
-		private final @Nullable Object userData;
-
-		public SlotData(int slot, @NotNull String name, @Nullable Object userData) {
-			this.slot = slot;
-			this.name = name;
-			this.userData = userData;
+	public record SlotData(int slot, @NotNull String name, @Nullable Object rawUserData) {
+		@SuppressWarnings("unchecked")
+		public <T> @NotNull T userData() throws IllegalStateException {
+			if (this.rawUserData == null)
+				throw new IllegalStateException("User data is null");
+			return (T) this.rawUserData;
 		}
 
+		@SuppressWarnings("unchecked")
+		public <T> @NotNull Optional<@NotNull T> optionalUserData() {
+			return Optional.ofNullable((T) this.rawUserData);
+		}
+
+		//<editor-fold desc="Legacy getters" defaultstate="collapsed">
+		/**
+		 * @deprecated {@link #slot()}
+		 */
+		@Deprecated
 		public int getSlot() {
-			return this.slot;
+			return this.slot();
 		}
 
+		/**
+		 * @deprecated {@link #name()}
+		 */
+		@Deprecated
 		public @NotNull String getName() {
-			return this.name;
+			return this.name();
 		}
 
-		@SuppressWarnings("unchecked")
-		public <T> @NotNull T getUserData() throws IllegalStateException {
-			try {
-				if (this.userData == null)
-					throw new IllegalStateException("User data is null");
-				return (T) this.userData;
-			} catch (ClassCastException e) {
-				throw new IllegalStateException("User data could not be cast to requested type", e);
-			}
-		}
-
-		@SuppressWarnings("unchecked")
-		public <T> @NotNull Optional<@NotNull T> getOptionalUserData() {
-			return (Optional<T>) Optional.ofNullable(this.userData);
-		}
-
+		/**
+		 * @deprecated {@link #rawUserData()}
+		 */
+		@Deprecated
 		public @Nullable Object getRawUserData() {
-			return this.userData;
+			return this.rawUserData();
 		}
+
+		/**
+		 * @deprecated {@link #userData()}
+		 */
+		@Deprecated
+		public <T> @NotNull T getUserData() throws IllegalStateException {
+			return this.userData();
+		}
+
+		/**
+		 * @deprecated {@link #optionalUserData()}
+		 */
+		@Deprecated
+		public <T> @NotNull Optional<T> getOptionalUserData() {
+			return this.optionalUserData();
+		}
+		//</editor-fold>
 	}
 }

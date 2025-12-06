@@ -82,14 +82,15 @@ public abstract class ExpressPaginatedGUI<P extends ExpressPlugin<P>, T> extends
 	@Override
 	public final boolean onClick(@NotNull Player player, @NotNull ClickType click, @NotNull InventoryAction action, @Nullable SlotData data) {
 		if (data != null) {
-			switch (data.getName()) {
-			case "previous":
-			case "next":
-				this.page = data.getUserData();
-				this.refresh(player);
-				return true;
-			case "element":
-				return this.onClickOnElement(player, click, action, data.getUserData());
+			switch (data.name()) {
+				case "previous", "next" -> {
+					this.page = data.userData();
+					this.refresh(player);
+					return true;
+				}
+				case "element" -> {
+					return this.onClickOnElement(player, click, action, data.userData());
+				}
 			}
 		}
 		return this.onOtherClick(player, click, action, data);
